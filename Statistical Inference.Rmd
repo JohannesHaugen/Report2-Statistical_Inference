@@ -3,5 +3,130 @@ title: "Arbeidskrav 2: Statistical Inference"
 author: "Johannes Urdahl Haugen"
 date: "10/19/2020"
 output: html_document
+editor_options: 
+  chunk_output_type: console
 ---
+
+```{r library packages, include=FALSE}
+library(readr)  # Laster inn pakkene med de ulike funksjonene.
+library(tidyverse)
+library(flextable)
+library(ggpubr)
+library(rstatix)
+```
+
+```{r last inn datafilen, include=FALSE}
+download.file(url = "https://ndownloader.figstatic.com/files/14702420", 
+              destfile = "./data/hypertrophy.csv")  # Laster ned datafilen.
+
+hypertrophy <- read_csv("./data/hypertrophy.csv")  # Laster inn datafilen og kobler den til objektet hypertrophy.
+
+var_interest <- c("SUB_ID", "CLUSTER", "AGE", "T1_BODY_MASS", 
+                  "PERCENT_TYPE_II_T1") # Plukker ut hvilke variabler vi er interesserte i å ha med og lagrer de i var_interest.
+```
+
+```{r oppsummeringstabell, include=FALSE}
+hyptable <- hypertrophy %>% # Kobler datasettet hypetrophy til objektet hyptable slik at vi kan lage en tabell uten å påvirke hypertrophy datasettet.
+  
+  select(all_of(var_interest)) %>% # Selekterer variablene fra var_interest.
+  
+  
+  # Denne delen spesifiserer hvilke verdier vi vil ha med og komprimerer datasettet.
+  # Navnene kommer inn i "variable" og verdier inn i "value".
+  pivot_longer(names_to = "variable",
+               values_to = "value",
+               cols = AGE:PERCENT_TYPE_II_T1) %>%
+  
+ group_by(CLUSTER, variable) %>%
+  filter(!is.na(CLUSTER)) %>%  #Filtrerer vekk forsøkspersoner som ikke ble regnet som 
+  # HIGH eller LOW responders.
+  
+  summarise (m = mean(value),
+             s = sd(value)) %>%  #Regner ut gjennomsnittet og standardavviket.
+  
+  mutate(ms = paste(round(m, 1), 
+                    " (",
+                    round(s, 1),
+                    ")", sep = ""), # Denne delen gjør at standardavviket havner i en parantes
+         # med en desimal.
+         
+         CLUSTER = factor(CLUSTER, levels = c("LOW", "HIGH"), #Justerer navnene på variablene
+                          labels = c("LOW (n = 10)",
+                                     "HIGH (n = 10)")),
+         
+         variable = factor(variable,
+                           levels = c("AGE", # Denne delen bestemmer rekkefølgen i tabellen
+                                      "T1_BODY_MASS", 
+                                      "PERCENT_TYPE_II_T1"),
+                           
+                           labels = c("Alder (år)",  # Bestemmer navnene på variablene
+                                      "Kroppsvekt (kg)",
+                                      "Type II fiber (%)"))) %>%
+  select(-m, -s) %>%   # Selekterer vekk gjennomsnittet og standardavviket
+  
+  pivot_wider(names_from = CLUSTER,
+              values_from = ms) %>% 
+  
+  arrange(variable) %>%   # Sorterer tabellen med utgangspunkt i variablene
+  select(variable, `LOW (n = 10)`, `HIGH (n = 10)`) %>% # Sorterer rekkefølgen på high og low
+  
+  print() # Printer resultatet av koden over
+
+```
+
+###### Haun et al. (2019) samlet inn data fra 30 menn i høyskolealder for å se på effekten av styrketrening med høy motstand. Intervensjonen varte i 6 uker og så på hvordan ulike fysiologiske parametre endret seg. De 20 med lavest og høyest respons ble delt inn i to grupper, HIGH-responders og LOW-responders. 
+
+###### I denne oppgaven skal jeg se på variabelen **"T3T1_PERCENT_CHANGE_FAST_CSA"**. Denne variabelen beskriver endringen i type II muskelfibre fra pre-test til post-test etter at intervensjonsperioden var gjennomført. I løpet av denne oppgaven skal jeg prøve å svare på følgende spørsmål: Var det en signifikant endring i mellom de to gruppene i løpet av intervensjonsperioden? 
+
+###### Tabell 1 viser med deskriptiv statistikk hvordan forskjellen mellom de to gruppene var ved pre-test. Jeg har valgt å ta med alder, vekt og mengden (i %) type II fibre forsøkpersonene hadde før intervensjonsperioden startet. Forsøkspersonene er gruppert i 2 grupper. HIGH-respondere og LOW-respondere. Tabellen representerer gjennomsnittsverdiene i de to gruppene.
+
+```{r deskriptiv tabell, echo=FALSE}
+hyptable %>% # Bruker objektet hyptable til å lage tabellen
+  
+  flextable() %>% #Lag tabell med Flextable
+  
+  set_header_labels(variable = "Variabel") %>% 
+  
+  add_header_row(values = "Table 1", colwidths = 3) %>% # Angir tittel på tabellen
+  
+  add_footer_row(values = "Verdier er oppgitt i gjennomsnitt og (Standardavvik)", colwidths = 3) %>%  #Angir en fotnote med beskrivelse av tabellen.
+  
+  set_table_properties( width = 1, layout = "autofit") #Gjør tabellen penere
+
+```
+<br>
+<br>
+
+###### Tabellen under viser endringene i type II fibre i de to ulike gruppene. Tallene representerer gjennomsnittet og standardavviket i de to gruppene.
+```{r Oppsummering av valgt variabel, echo=FALSE, message=FALSE, warning=FALSE}
+
+df <- read_csv("./data/hypertrophy.csv") %>% # Les datasettet og angi det i objektet df
+  filter(!is.na(CLUSTER)) %>% # Filtrerer vekk fp uten en definert gruppe
+  select(CLUSTER, SUB_ID, T3T1_PERCENT_CHANGE_FAST_CSA) %>% # Velg hvilke variabler vi vil ha med.
+  group_by(CLUSTER) %>% # Grupper etter CLUSTER-variabelen
+  get_summary_stats(T3T1_PERCENT_CHANGE_FAST_CSA, type = "mean_sd") # Få en oppsummering av tallene.
+  
+df %>%
+  mutate(variable = factor(variable, levels = c("T3T1_PERCENT_CHANGE_FAST_CSA", 
+                                                "T3T1_PERCENT_CHANGE_FAST_CSA"),
+                           labels = c("Type II fibre percent change",
+                                      "Type II fibre precent change"))) %>% # Endrer variabelteksten.
+  
+  flextable() %>% #Lag tabell med Flextable
+  
+  set_header_labels(CLUSTER = "Cluster", # Endrer overskriftene i tabellen.
+                    variable = "Variabel", 
+                    n = "n",
+                    mean = "Gjennomsnitt",
+                    sd = "SD") %>%
+  add_header_row(values = "Oppsummering av endringer mellom HIGH- og LOW-respondere", colwidths = 5) %>% #Angir tittel på tabellen
+  
+  
+  set_table_properties( width = 1, layout = "autofit") #Gjør tabellen penere
+
+
+```
+<br>
+<br>
+
 
