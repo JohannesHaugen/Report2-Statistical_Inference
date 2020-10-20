@@ -129,4 +129,22 @@ df %>%
 <br>
 <br>
 
+###### Plottet under viser endringene i type II fibre i de to ulike gruppene. 
+```{r fig1, echo=FALSE, fig.height=3, fig.width=5, message=FALSE, warning=FALSE}
+
+hyp <- read_csv("./data/hypertrophy.csv") %>% 
+  filter(!is.na(CLUSTER)) # Filtrerer vekk forsøkspersoner uten gruppe
+
+bxp <- ggboxplot(hyp, x = "CLUSTER", y = "T3T1_PERCENT_CHANGE_FAST_CSA", 
+                 ylab = "Endriner i type II fiber", xlab = "CLUSTER", add = "jitter", SIZE = 0.5) # Denne funskjonen lager et boxplot med utgangspunkt i variabelen hypertrophy.
+
+bxp
+
+
+```
+
+
+
+
+
 

@@ -66,7 +66,9 @@ hyptable <- hypertrophy %>%
 hyptable %>%
   flextable() %>% #Lag tabell med Flextable
   
-  add_header_row(values = "Table 1", colwidths = 3) %>% #Angir tittel på tabellen
+  set_header_labels(variable = "Variabel") %>%
+  
+  add_header_row(values = "Tabell 1", colwidths = 3) %>% #Angir tittel på tabellen
   
   add_footer_row(values = "Values are mean and (SD)", colwidths = 3) %>% #Angir en fotnote
 # med beskrivelse av tabellen.
@@ -75,8 +77,12 @@ hyptable %>%
   
 
 ########################################
-# Prepare the data for testing
-bxp <- ggboxplot(hypertrophy, x = "CLUSTER", y = "T3T1_PERCENT_CHANGE_FAST_CSA", 
+# KAOS
+
+hypbxp <- read_csv("./data/hypertrophy.csv") %>%
+  filter(!is.na(CLUSTER))
+
+bxp <- ggboxplot(hypbxp, x = "CLUSTER", y = "T3T1_PERCENT_CHANGE_FAST_CSA", 
                  ylab = "Fiber type II change", xlab = "CLUSTER", add = "jitter")
 
 bxp
@@ -90,6 +96,11 @@ df <- read_csv("./data/hypertrophy.csv") %>%
   print()
   
 df %>%
+  mutate(variable = factor(variable, levels = c("T3T1_PERCENT_CHANGE_FAST_CSA", 
+                                                "T3T1_PERCENT_CHANGE_FAST_CSA"),
+                           labels = c("Type II fibre percent change",
+                                      "Type II fibre precent change"))) %>%
+  
   flextable() %>% #Lag tabell med Flextable
   
   set_header_labels(CLUSTER = "Cluster",
@@ -103,17 +114,42 @@ df %>%
   autofit()
 
 
-bxp <- ggboxplot(df, x = "CLUSTER", y = "T3T1_PERCENT_CHANGE_FAST_CSA", 
-  ylab = "Fiber type II change", xlab = "CLUSTER", add = "jitter")
+
+
+bxp <- ggboxplot(hypertrophy, x = "CLUSTER", y = "T3T1_PERCENT_CHANGE_FAST_CSA", 
+                 ylab = "Fiber type II change", xlab = "CLUSTER", add = "jitter")
 
 bxp
 
-df %>%
-  identify_outliers(variable) %>%
-  print()
+
+##############################
+# T-test
+
+# Tester om dataene er normaltfordelt med en shapiro-test.
+hyp %>%
+  group_by(CLUSTER) %>%
+  shapiro_test(T3T1_PERCENT_CHANGE_FAST_CSA) %>%
+  print ()
+
+# Plott som viser normalfordelingen
+ggqqplot(hyp, x = "T3T1_PERCENT_CHANGE_FAST_CSA", facet.by = "CLUSTER")
+
+# Test variansen i gruppene. Er variansen tilnærnmet lik skal p være mindre enn 0.05
+hyp %>% levene_test(T3T1_PERCENT_CHANGE_FAST_CSA ~ CLUSTER)
+
+# Variansen i gruppene er tilnærmet lik i følge levene_testen. Derfor kjøres t-testen med
+# var.equal = TRUE.
+stat.test <- hyp %>% 
+  t_test(T3T1_PERCENT_CHANGE_FAST_CSA ~ CLUSTER, var.equal = TRUE) %>%
+  add_significance()
+stat.test
+
+# Kalkulering av Effect size
+hyp %>%  cohens_d(T3T1_PERCENT_CHANGE_FAST_CSA ~ CLUSTER, var.equal = TRUE)
 
 
-
-
-
+stat.test <- stat.test %>% add_xy_position(x = "CLUSTER")
+bxp + 
+  stat_pvalue_manual(stat.test, tip.length = 0) +
+  labs(subtitle = get_test_label(stat.test, detailed = TRUE))
 
