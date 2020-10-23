@@ -153,3 +153,21 @@ bxp +
   stat_pvalue_manual(stat.test, tip.length = 0) +
   labs(subtitle = get_test_label(stat.test, detailed = TRUE))
 
+
+##### Tabell med resultater fra t-testen
+
+stat.test %>%
+  select(group1, group2, n1, n2, p) %>%
+  flextable() %>% #Lag tabell med Flextable
+  
+  set_header_labels(group1 = "Gruppe 1",
+                    group2 = "Gruppe 2",
+                    n1 = "Antall i gruppe 1",
+                    n2 = "Antall i gruppe 2",
+                    p = "P-verdi") %>% 
+  
+  add_header_row(values = "Resultater fra t-test", colwidths = 5) %>% # Angir tittel på tabellen
+  
+  set_table_properties( width = 1, layout = "autofit")
+
+

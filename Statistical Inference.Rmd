@@ -77,10 +77,13 @@ hyptable <- hypertrophy %>% # Kobler datasettet hypetrophy til objektet hyptable
 ### Introduksjon
 ###### Haun et al. (2019) samlet inn data fra 30 menn i høyskolealder for å se på effekten av styrketrening med høy motstand. Intervensjonen varte i 6 uker og så på hvordan ulike fysiologiske parametre endret seg. De 20 med lavest og høyest respons ble delt inn i to grupper, HIGH-responders og LOW-responders. 
 
-###### I denne oppgaven skal jeg se på variabelen **"T3T1_PERCENT_CHANGE_FAST_CSA"**. Denne variabelen beskriver endringen i type II muskelfibre fra pre-test til post-test etter at intervensjonsperioden var gjennomført. I løpet av denne oppgaven skal jeg prøve å svare på følgende spørsmål: Var det en signifikant endring i type II muskelfibre mellom de to gruppene i løpet av intervensjonsperioden? 
+###### I denne oppgaven skal jeg se på variabelen "T3T1_PERCENT_CHANGE_FAST_CSA". Denne variabelen beskriver endringen i type II muskelfibre fra pre-test til post-test etter at intervensjonsperioden var gjennomført. I løpet av denne oppgaven skal jeg prøve å svare på følgende spørsmål: Var det en signifikant forskjell i hvordan type II muskelfibre endret seg i løpet av intervensjonsperioden?
+<br>
+<br>
 
 ### Deskriptiv statistikk
-###### Tabell 1 viser hvordan forskjellen mellom de to gruppene var ved pre-test. Jeg har valgt å ta med alder, vekt og mengden (i %) type II fibre forsøkpersonene hadde før intervensjonsperioden startet. Forsøkspersonene er gruppert i 2 grupper. HIGH-respondere og LOW-respondere. Tabellen representerer gjennomsnittsverdiene i de to gruppene.
+
+###### Tabell 1 viser hvordan forskjellen mellom de to gruppene var ved pre-test. Jeg har valgt å ta med alder, vekt og mengden type II fibre forsøkpersonene hadde før intervensjonsperioden startet. Forsøkspersonene er gruppert i 2 grupper, HIGH-respondere og LOW-respondere.
 
 ```{r deskriptiv tabell, echo=FALSE}
 hyptable %>% # Bruker objektet hyptable til å lage tabellen
@@ -93,13 +96,14 @@ hyptable %>% # Bruker objektet hyptable til å lage tabellen
   
   add_footer_row(values = "Verdier er oppgitt i gjennomsnitt og (Standardavvik)", colwidths = 3) %>%  #Angir en fotnote med beskrivelse av tabellen.
   
-  set_table_properties( width = 1, layout = "autofit") #Gjør tabellen penere
+  set_table_properties( width = 1, layout = "autofit") %>% #Gjør tabellen penere
+  fontsize(part = "header", size = 12) # Endrer størrelsen på headerne
 
 ```
 <br>
+<br>
 
-
-###### Tabellen under viser endringene i type II fibre i de to ulike gruppene. Tallene representerer gjennomsnittet og standardavviket i de to gruppene.
+###### Tabell 2 viser endringene i type II fibre i de to ulike gruppene ved variabelen "Type II fiber change". Tallene representerer gjennomsnittlig endring i de to gruppene og standardavviket.
 ```{r oppsummering av valgt variabel, echo=FALSE, message=FALSE, warning=FALSE}
 
 df <- read_csv("./data/hypertrophy.csv") %>% # Les datasettet og angi det i objektet df
@@ -111,8 +115,8 @@ df <- read_csv("./data/hypertrophy.csv") %>% # Les datasettet og angi det i obje
 df %>%
   mutate(variable = factor(variable, levels = c("T3T1_PERCENT_CHANGE_FAST_CSA", 
                                                 "T3T1_PERCENT_CHANGE_FAST_CSA"),
-                           labels = c("Type II fibre change (%)",
-                                      "Type II fibre change (%)"))) %>% # Endrer variabelteksten.
+                           labels = c("Type II fiber change (%)",
+                                      "Type II fiber change (%)"))) %>% # Endrer variabelteksten.
   
   flextable() %>% #Lag tabell med Flextable
   
@@ -121,37 +125,45 @@ df %>%
                     n = "n",
                     mean = "Gjennomsnitt",
                     sd = "SD") %>%
-  add_header_row(values = "Oppsummering av endringer mellom HIGH- og LOW-respondere", colwidths = 5) %>% #Angir tittel på tabellen
+  add_header_row(values = "Tabell 2", colwidths = 5) %>% #Angir tittel på tabellen
   
   
-  set_table_properties( width = 1, layout = "autofit") #Gjør tabellen penere
+  set_table_properties( width = 1, layout = "autofit") %>% #Gjør tabellen penere
+  fontsize(part = "header", size = 12) # Endrer størrelsen på headerne
+
+
 
 
 ```
 <br>
+<br>
 
-
-###### Plottet under viser endringene i type II fibre i de to ulike gruppene. 
+###### Figur 1 viser endringene i type II fiber i de to ulike gruppene. 
 ```{r endring i type II, echo=FALSE, fig.height=3, fig.width=5, message=FALSE, warning=FALSE}
 
 hyp <- read_csv("./data/hypertrophy.csv") %>% 
   filter(!is.na(CLUSTER)) # Filtrerer vekk forsøkspersoner uten gruppe
 
 bxp <- ggboxplot(hyp, x = "CLUSTER", y = "T3T1_PERCENT_CHANGE_FAST_CSA", 
-                 ylab = "Endringer i type II fiber (%)", xlab = "CLUSTER", add = "jitter", SIZE = 0.5) # Denne funskjonen lager et boxplot med utgangspunkt i variabelen hypertrophy.
+                 ylab = "Endringer i type II fiber (%)", xlab = "CLUSTER", add = "jitter", SIZE = 0.5, fill = "CLUSTER",
+                 title = "Figur 1") + # Denne funskjonen lager et boxplot med utgangspunkt i variabelen hypertrophy.
+  font("title", size = 10, face = "bold") + # Endrer størrelsen på etikettene
+  font("xlab", size = 9) +
+  font("ylab", size = 9) 
 
-bxp
+bxp + theme(legend.position = "none") # Fjerner legenden
 
 
 ```
 <br>
 <br>
 
-### T-test
-###### For å kunne svare på spørsmålet om det var en signifikant forskjell mellom endringene i de to gruppene må jeg gjennomføre en t-test. Før jeg gjennomfører t-testen ser jeg på om verdiene i gruppene er normalfordelt og om det er like stor varians i gruppene. 
+### Metode
+###### For å kunne svare på spørsmålet om det var en signifikant forskjell mellom de to gruppene må jeg gjennomføre en t-test. Før jeg gjennomfører t-testen ser jeg på om verdiene i gruppene er normalfordelt og om det er like stor varians i gruppene. 
+<br>
 
-###### Plottet under viser at gruppene er tilnærmet normalfordelt.
-
+#### Normalfordeling
+###### For å teste om dataene fra de to gruppene er tilnærmet normalfordelt brukes en Shapiro-Wilk-test. Hvis resultatet av testen gir en p-verdi høyere enn 0.05 er dataene tilnærmet normalfordelt. Resultatet av testen ga en p-verdi på 0.271 i HIGH-responder gruppa og en p-verdi på 0.990 i LOW-responder gruppa. Figur 2 viser ved et QQ-plot at begge gruppene var tilnærmet normalfordelt.
 ```{r test av normaldfordeling, fig.height=3, fig.width=5, message=FALSE, warning=FALSE, include=FALSE}
 # Tester om dataene er normaltfordelt med en shapiro-test.
 hyp %>%
@@ -162,21 +174,30 @@ hyp %>%
 
 ```{r plott som viser normalfordelingen, fig.height=3, fig.width=5, message=FALSE, warning=FALSE, echo=FALSE}
 # Plott som viser normalfordelingen
-ggqqplot(hyp, x = "T3T1_PERCENT_CHANGE_FAST_CSA", facet.by = "CLUSTER")
+ggqqplot(hyp, x = "T3T1_PERCENT_CHANGE_FAST_CSA", facet.by = "CLUSTER") + # Lager plottet med utgangspunkt i variablene
+  labs(caption = "QQ-plottet viser at dataene er tilnærmet normalfordelt.", title = "Figur 2", cex.title=0.5) +
+  font("title", size = 10, face = "bold") +
+  font("xlab", size = 9) +
+  font("ylab", size = 9) +
+  font("caption", size = 8)
 
 ```
 <br>
+<br>
 
-###### Deretter testet jeg variansen i mellom de to gruppene ved hjelp av en levene_test. Hvis p-verdien er mindre enn 0.05 er ikke variansen i gruppene lik. Er p-verdien over 0.05 er variansen i gruppene tilnærmet lik. Resultatet kan du lese av i koden under. 
+#### Varians
+###### Deretter testet jeg variansen i mellom de to gruppene ved hjelp av en levene_test. Hvis p-verdien er mindre enn 0.05 er ikke variansen i gruppene lik. Er p-verdien over 0.05 er variansen i gruppene tilnærmet lik. Resultatet av testen vises i koden under. 
 
 ```{r test av variansen, echo=TRUE, message=FALSE, warning=FALSE}
 hyp %>% levene_test(T3T1_PERCENT_CHANGE_FAST_CSA ~ CLUSTER)
 
 ```
 <br>
+<br>
 
-###### Resultatet av variansen viste at variansen i gruppene var tilnærmet lik. Dette betyr at når t-testen gjennomfører må det registreres at variansen er lik. I og med at to forskjellige grupper skal testes opp mot hverandre må vi bruke en uavhengig t-test. Resultatet av t-testen ser du i koden under. Tabellen oppsummerer resultatene forenklet.
-```{r t-test, echo=FALSE, message=FALSE, warning=FALSE}
+#### T-test
+###### Resultatet av variansen viste at variansen i gruppene var tilnærmet lik. Dette betyr at når t-testen gjennomføres må det registreres at variansen er lik. Når det er to forskjellige grupper som skal testes opp mot hverandre må vi bruke en uavhengig t-test. Tabell 3 oppsummerer resultatet av testen.
+```{r t-test, message=FALSE, warning=FALSE, include=FALSE}
 stat.test <- hyp %>% # Lager et nytt objekt
   t_test(T3T1_PERCENT_CHANGE_FAST_CSA ~ CLUSTER, var.equal = TRUE) %>% # Gjennomfører t-testen med valgte variabler med en varians som er registrert som lik.
   add_significance()
@@ -195,18 +216,23 @@ stat.test %>%
                     n2 = "Antall i gruppe 2",
                     p = "P-verdi") %>% # Angir overskriftene i de ulike kolonnene
   
-  add_header_row(values = "Resultater fra t-test", colwidths = 5) %>% # Angir tittel på tabellen
+  add_header_row(values = "Tabell 3", colwidths = 5) %>% # Angir tittel på tabellen
   
-  set_table_properties( width = 1, layout = "autofit")
+  set_table_properties( width = 1, layout = "autofit") %>% # Gjør tabellen penere
+  fontsize(part = "header", size = 12) # Endrer størrelsen på headerne
+
 ```
 <br>
+<br>
 
-###### T-testen viste en signifikant P-verdi, men for å gjøre konklusjonen tydeligere er det greit å ta med effect size som et mål på hvor markant forskjellen faktisk er. Til å regne ut effect size bruker jeg Cohens D-formel. Koden under viser hvordan effect size regnes ut og resultatet.
+#### Effect size
+###### T-testen viste en signifikant P-verdi, men for å gjøre konklusjonen tydeligere er det greit å ta med effect size som et mål på hvor markant forskjellen faktisk er. Til å regne ut effect size bruker jeg Cohens D-formel. Koden under viser hvordan effect size regnes ut og hva som ble resultatet.
 
 ```{r effect size, echo=TRUE, message=FALSE, warning=FALSE}
 hyp %>%  cohens_d(T3T1_PERCENT_CHANGE_FAST_CSA ~ CLUSTER, var.equal = TRUE) 
 
 ```
+<br>
 <br>
 
 ### Konklusjon
@@ -216,8 +242,13 @@ hyp %>%  cohens_d(T3T1_PERCENT_CHANGE_FAST_CSA ~ CLUSTER, var.equal = TRUE)
 stat.test <- stat.test %>% add_xy_position(x = "CLUSTER")
 bxp + 
   stat_pvalue_manual(stat.test, tip.length = 0) +
-  labs(subtitle = get_test_label(stat.test, detailed = TRUE))
+  labs(subtitle = get_test_label(stat.test, detailed = TRUE),
+       title = "Figur 3") +
+  theme(legend.position = "none") +
+  font("subtitle", size = 9) +
+  font("xlab", size = 9) +
+  font("ylab", size = 9) + 
+  font("title", size = 10, face = "bold")
 
 ```
-
 
