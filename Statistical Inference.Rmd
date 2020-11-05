@@ -187,18 +187,18 @@ ggqqplot(hyp, x = "T3T1_PERCENT_CHANGE_FAST_CSA", facet.by = "CLUSTER") + # Lage
 <br>
 
 #### Varians
-Deretter testet jeg variansen i mellom de to gruppene ved hjelp av en levene_test. Hvis p-verdien er mindre enn 0.05 er ikke variansen i gruppene lik. Er p-verdien over 0.05 er variansen i gruppene tilnærmet lik. Resultatet av testen vises i koden under. 
-
-```{r test av variansen, echo=TRUE, message=FALSE, warning=FALSE}
-# Maybe also include in text?
-hyp %>% levene_test(T3T1_PERCENT_CHANGE_FAST_CSA ~ CLUSTER)
+```{r test av variansen, message=FALSE, warning=FALSE, include=FALSE}
+levene <- hyp %>% 
+  levene_test(T3T1_PERCENT_CHANGE_FAST_CSA ~ CLUSTER)
 
 ```
+Deretter testet jeg variansen i mellom de to gruppene ved hjelp av en levene_test. Hvis p-verdien er mindre enn 0.05 er ikke variansen i gruppene lik. Er p-verdien over 0.05 er variansen i gruppene tilnærmet lik. Resultatet av testen ble en p-verdi på `r levene[1, 4]` og sier at variansen i de to gruppene er tilnærmet lik.
+
 <br>
 <br>
 
 #### T-test
-Resultatet av variansen viste at variansen i gruppene var tilnærmet lik. Dette betyr at når t-testen gjennomføres må det registreres at variansen er lik. Når det er to forskjellige grupper som skal testes opp mot hverandre må vi bruke en uavhengig t-test. Tabell 3 oppsummerer resultatet av testen.
+Resultatet av varians-testen viste at variansen i gruppene var tilnærmet lik. Dette betyr at når t-testen gjennomføres må det registreres at variansen er lik. Når det er to forskjellige grupper som skal testes opp mot hverandre må vi bruke en uavhengig t-test. Tabell 3 oppsummerer resultatet av testen.
 ```{r t-test, message=FALSE, warning=FALSE, include=FALSE}
 stat.test <- hyp %>% # Lager et nytt objekt
   t_test(T3T1_PERCENT_CHANGE_FAST_CSA ~ CLUSTER, var.equal = TRUE) %>% # Gjennomfører t-testen med valgte variabler med en varians som er registrert som lik.
@@ -228,19 +228,17 @@ stat.test %>%
 <br>
 
 #### Effect size
-T-testen viste en signifikant P-verdi, men for å gjøre konklusjonen tydeligere er det greit å ta med effect size som et mål på hvor markant forskjellen faktisk er. Til å regne ut effect size bruker jeg Cohens D-formel. Koden under viser hvordan effect size regnes ut og hva som ble resultatet.
-
-```{r effect size, echo=TRUE, message=FALSE, warning=FALSE}
-hyp %>%  cohens_d(T3T1_PERCENT_CHANGE_FAST_CSA ~ CLUSTER, var.equal = TRUE) 
-
-### Use `r ...` to include results from tests in the text ...
+```{r effect size, message=FALSE, warning=FALSE, include=FALSE}
+cohen <- hyp %>%  cohens_d(T3T1_PERCENT_CHANGE_FAST_CSA ~ CLUSTER, var.equal = TRUE) 
 
 ```
+T-testen viste en signifikant P-verdi, men for å gjøre konklusjonen tydeligere er det greit å ta med effect size som et mål på hvor markant forskjellen faktisk er. Til å regne ut effect size bruker jeg Cohens D-formel. Cohens D-formel ga et resultat på `r cohen[1, 4]`. Dette betegnes som en markant effekstørrelsen.
+
 <br>
 <br>
 
 ### Konklusjon
-Gjennomsnittsendringen i type II muskelfibre var 21.964% (SD 20.169) i HIGH-responder gruppa og -7.436% (SD 11.470) i LOW-responder gruppa. Resultatet av en uavhengig t-test viste at det var en statistisk signifikant forskjell i mellom gruppene (P = 0.000827). Effect size regnet ut ved Cohens D-formel viste 1.79 og betegnes som markant.
+Gjennomsnittsendringen i type II muskelfibre var 21.964% (SD 20.169) i HIGH-responder gruppa og -7.436% (SD 11.470) i LOW-responder gruppa. Resultatet av en uavhengig t-test viste at det var en statistisk signifikant forskjell i mellom gruppene (P = 0.000827). Effect size regnet ut ved Cohens D-formel viste `r cohen[1, 4]` og betegnes som markant.
 
 ```{r figur konklusjon, fig.height=3, fig.width=5, echo=FALSE, message=FALSE, warning=FALSE}
 stat.test <- stat.test %>% add_xy_position(x = "CLUSTER")
