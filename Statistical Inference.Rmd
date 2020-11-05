@@ -67,23 +67,21 @@ hyptable <- hypertrophy %>% # Kobler datasettet hypetrophy til objektet hyptable
               values_from = ms) %>% 
   
   arrange(variable) %>%   # Sorterer tabellen med utgangspunkt i variablene
-  select(variable, `LOW (n = 10)`, `HIGH (n = 10)`) %>% # Sorterer rekkefølgen på high og low
+  select(variable, `LOW (n = 10)`, `HIGH (n = 10)`) # Sorterer rekkefølgen på high og low
   
-  print() # Printer resultatet av koden over
 
 ```
 
 
 ### Introduksjon
-###### Haun et al. (2019) samlet inn data fra 30 menn i høyskolealder for å se på effekten av styrketrening med høy motstand. Intervensjonen varte i 6 uker og så på hvordan ulike fysiologiske parametre endret seg. De 20 med lavest og høyest respons ble delt inn i to grupper, HIGH-responders og LOW-responders. 
+ Haun et al. (2019) samlet inn data fra 30 menn i høyskolealder for å se på effekten av styrketrening med høy motstand. Intervensjonen varte i 6 uker og så på hvordan ulike fysiologiske parametre endret seg. De 20 med lavest og høyest respons ble delt inn i to grupper, HIGH-responders og LOW-responders. 
 
-###### I denne oppgaven skal jeg se på variabelen "T3T1_PERCENT_CHANGE_FAST_CSA". Denne variabelen beskriver endringen i type II muskelfibre fra pre-test til post-test etter at intervensjonsperioden var gjennomført. I løpet av denne oppgaven skal jeg prøve å svare på følgende spørsmål: Var det en signifikant forskjell i hvordan type II muskelfibre endret seg i løpet av intervensjonsperioden?
-<br>
-<br>
+I denne oppgaven skal jeg se på variabelen "T3T1_PERCENT_CHANGE_FAST_CSA". Denne variabelen beskriver endringen i type II muskelfibre fra pre-test til post-test etter at intervensjonsperioden var gjennomført. I løpet av denne oppgaven skal jeg prøve å svare på følgende spørsmål: Var det en signifikant forskjell i hvordan type II muskelfibre endret seg i løpet av intervensjonsperioden?
+
 
 ### Deskriptiv statistikk
 
-###### Tabell 1 viser hvordan forskjellen mellom de to gruppene var ved pre-test. Jeg har valgt å ta med alder, vekt og mengden type II fibre forsøkpersonene hadde før intervensjonsperioden startet. Forsøkspersonene er gruppert i 2 grupper, HIGH-respondere og LOW-respondere.
+Tabell 1 viser hvordan forskjellen mellom de to gruppene var ved pre-test. Jeg har valgt å ta med alder, vekt og mengden type II fibre forsøkpersonene hadde før intervensjonsperioden startet. Forsøkspersonene er gruppert i 2 grupper, HIGH-respondere og LOW-respondere.
 
 ```{r deskriptiv tabell, echo=FALSE}
 hyptable %>% # Bruker objektet hyptable til å lage tabellen
@@ -103,7 +101,7 @@ hyptable %>% # Bruker objektet hyptable til å lage tabellen
 <br>
 <br>
 
-###### Tabell 2 viser endringene i type II fibre i de to ulike gruppene ved variabelen "Type II fiber change". Tallene representerer gjennomsnittlig endring i de to gruppene og standardavviket.
+Tabell 2 viser endringene i type II fibre i de to ulike gruppene ved variabelen "Type II fiber change". Tallene representerer gjennomsnittlig endring i de to gruppene og standardavviket.
 ```{r oppsummering av valgt variabel, echo=FALSE, message=FALSE, warning=FALSE}
 
 df <- read_csv("./data/hypertrophy.csv") %>% # Les datasettet og angi det i objektet df
@@ -132,13 +130,12 @@ df %>%
   fontsize(part = "header", size = 12) # Endrer størrelsen på headerne
 
 
-
-
 ```
 <br>
 <br>
 
-###### Figur 1 viser endringene i type II fiber i de to ulike gruppene. 
+Figur 1 viser endringene i type II fiber i de to ulike gruppene. 
+
 ```{r endring i type II, echo=FALSE, fig.height=3, fig.width=5, message=FALSE, warning=FALSE}
 
 hyp <- read_csv("./data/hypertrophy.csv") %>% 
@@ -159,18 +156,22 @@ bxp + theme(legend.position = "none") # Fjerner legenden
 <br>
 
 ### Metode
-###### For å kunne svare på spørsmålet om det var en signifikant forskjell mellom de to gruppene må jeg gjennomføre en t-test. Før jeg gjennomfører t-testen ser jeg på om verdiene i gruppene er normalfordelt og om det er like stor varians i gruppene. 
+For å kunne svare på spørsmålet om det var en signifikant forskjell mellom de to gruppene må jeg gjennomføre en t-test. Før jeg gjennomfører t-testen ser jeg på om verdiene i gruppene er normalfordelt og om det er like stor varians i gruppene. 
 <br>
 
 #### Normalfordeling
-###### For å teste om dataene fra de to gruppene er tilnærmet normalfordelt brukes en Shapiro-Wilk-test. Hvis resultatet av testen gir en p-verdi høyere enn 0.05 er dataene tilnærmet normalfordelt. Resultatet av testen ga en p-verdi på 0.271 i HIGH-responder gruppa og en p-verdi på 0.990 i LOW-responder gruppa. Figur 2 viser ved et QQ-plot at begge gruppene var tilnærmet normalfordelt.
+
 ```{r test av normaldfordeling, fig.height=3, fig.width=5, message=FALSE, warning=FALSE, include=FALSE}
 # Tester om dataene er normaltfordelt med en shapiro-test.
-hyp %>%
+shapiro <- hyp %>%
   group_by(CLUSTER) %>%
   shapiro_test(T3T1_PERCENT_CHANGE_FAST_CSA)
 
+
 ```
+
+For å teste om dataene fra de to gruppene er tilnærmet normalfordelt brukes en Shapiro-Wilk-test. Hvis resultatet av testen gir en p-verdi høyere enn 0.05 er dataene tilnærmet normalfordelt. Resultatet av testen ga en p-verdi på `r shapiro[1, 4]` i HIGH-responder gruppa og en p-verdi på `r shapiro[2, 4]` i LOW-responder gruppa. Figur 2 viser ved et QQ-plot at begge gruppene var tilnærmet normalfordelt.
+
 
 ```{r plott som viser normalfordelingen, fig.height=3, fig.width=5, message=FALSE, warning=FALSE, echo=FALSE}
 # Plott som viser normalfordelingen
@@ -186,9 +187,10 @@ ggqqplot(hyp, x = "T3T1_PERCENT_CHANGE_FAST_CSA", facet.by = "CLUSTER") + # Lage
 <br>
 
 #### Varians
-###### Deretter testet jeg variansen i mellom de to gruppene ved hjelp av en levene_test. Hvis p-verdien er mindre enn 0.05 er ikke variansen i gruppene lik. Er p-verdien over 0.05 er variansen i gruppene tilnærmet lik. Resultatet av testen vises i koden under. 
+Deretter testet jeg variansen i mellom de to gruppene ved hjelp av en levene_test. Hvis p-verdien er mindre enn 0.05 er ikke variansen i gruppene lik. Er p-verdien over 0.05 er variansen i gruppene tilnærmet lik. Resultatet av testen vises i koden under. 
 
 ```{r test av variansen, echo=TRUE, message=FALSE, warning=FALSE}
+# Maybe also include in text?
 hyp %>% levene_test(T3T1_PERCENT_CHANGE_FAST_CSA ~ CLUSTER)
 
 ```
@@ -196,7 +198,7 @@ hyp %>% levene_test(T3T1_PERCENT_CHANGE_FAST_CSA ~ CLUSTER)
 <br>
 
 #### T-test
-###### Resultatet av variansen viste at variansen i gruppene var tilnærmet lik. Dette betyr at når t-testen gjennomføres må det registreres at variansen er lik. Når det er to forskjellige grupper som skal testes opp mot hverandre må vi bruke en uavhengig t-test. Tabell 3 oppsummerer resultatet av testen.
+Resultatet av variansen viste at variansen i gruppene var tilnærmet lik. Dette betyr at når t-testen gjennomføres må det registreres at variansen er lik. Når det er to forskjellige grupper som skal testes opp mot hverandre må vi bruke en uavhengig t-test. Tabell 3 oppsummerer resultatet av testen.
 ```{r t-test, message=FALSE, warning=FALSE, include=FALSE}
 stat.test <- hyp %>% # Lager et nytt objekt
   t_test(T3T1_PERCENT_CHANGE_FAST_CSA ~ CLUSTER, var.equal = TRUE) %>% # Gjennomfører t-testen med valgte variabler med en varians som er registrert som lik.
@@ -226,17 +228,19 @@ stat.test %>%
 <br>
 
 #### Effect size
-###### T-testen viste en signifikant P-verdi, men for å gjøre konklusjonen tydeligere er det greit å ta med effect size som et mål på hvor markant forskjellen faktisk er. Til å regne ut effect size bruker jeg Cohens D-formel. Koden under viser hvordan effect size regnes ut og hva som ble resultatet.
+T-testen viste en signifikant P-verdi, men for å gjøre konklusjonen tydeligere er det greit å ta med effect size som et mål på hvor markant forskjellen faktisk er. Til å regne ut effect size bruker jeg Cohens D-formel. Koden under viser hvordan effect size regnes ut og hva som ble resultatet.
 
 ```{r effect size, echo=TRUE, message=FALSE, warning=FALSE}
 hyp %>%  cohens_d(T3T1_PERCENT_CHANGE_FAST_CSA ~ CLUSTER, var.equal = TRUE) 
+
+### Use `r ...` to include results from tests in the text ...
 
 ```
 <br>
 <br>
 
 ### Konklusjon
-###### Gjennomsnittsendringen i type II muskelfibre var 21.964% (SD 20.169) i HIGH-responder gruppa og -7.436% (SD 11.470) i LOW-responder gruppa. Resultatet av en uavhengig t-test viste at det var en statistisk signifikant forskjell i mellom gruppene (P = 0.000827). Effect size regnet ut ved Cohens D-formel viste 1.79 og betegnes som markant.
+Gjennomsnittsendringen i type II muskelfibre var 21.964% (SD 20.169) i HIGH-responder gruppa og -7.436% (SD 11.470) i LOW-responder gruppa. Resultatet av en uavhengig t-test viste at det var en statistisk signifikant forskjell i mellom gruppene (P = 0.000827). Effect size regnet ut ved Cohens D-formel viste 1.79 og betegnes som markant.
 
 ```{r figur konklusjon, fig.height=3, fig.width=5, echo=FALSE, message=FALSE, warning=FALSE}
 stat.test <- stat.test %>% add_xy_position(x = "CLUSTER")
